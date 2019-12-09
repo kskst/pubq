@@ -143,3 +143,4 @@ yarn-error.log
 
 # End of https://www.gitignore.io/api/vue,vuejs,django
 
+app/pubq/static/dashboard/**/*
