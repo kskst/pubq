@@ -1,0 +1,243 @@
+swagger: "2.0"
+info:
+  description: "pubqのSPA部分で使用するAPI。"
+  version: "1.0.0"
+  title: "Pabq API"
+host: "api.pubq.com"
+basePath: "/v1.0"
+schemes:
+- "https"
+paths:
+  /question:
+    get:
+      summary: "質問一覧取得"
+      description: "自身が送信、及び受信した質問の一覧を取得する"
+      parameters:
+      - name: "page"
+        in: "query"
+        description: "pagerの何ページ目を取得するか"
+        required: false
+        type: "integer"
+        default: 1
+      - name: "limit"
+        in: "query"
+        description: "取得数。指定をしていない場合全てを取得"
+        required: false
+        type: "integer"
+      - name: "type"
+        in: "query"
+        required: false
+        type: "string"
+        description: "送受信の指定。send | receive | all の何れかが入る。無効な文字列、または指定をしていない場合はall"
+        default: "all"
+      - name: "order"
+        in: "query"
+        required: false
+        type: "string"
+        description: "質問日のソート指定。 asc | desc の何れかが入る。無効な文字列、または指定をしていない場合はソートは行わない"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/message"
+  /question/{msg_id}:
+    get:
+      summary: "質問取得"
+      description: "指定したmsg_idの質問を取得する"
+      parameters:
+      - name: "msg_id"
+        in: "path"
+        description: "取得する質問ID"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            $ref: "#/definitions/message"
+    put:
+      summary: "質問更新"
+      description: "指定したmsg_idの質問を更新する"
+      parameters:
+      - name: "msg_id"
+        in: "path"
+        description: "更新する質問ID"
+        required: true
+        type: "string"
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/message"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            $ref: "#/definitions/message"
+    delete:
+      summary: "受信質問削除"
+      description: "指定されたmsg_idの質問を削除。論理削除"
+      parameters:
+      - name: "msg_id"
+        in: "path"
+        description: "削除する質問のID"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "成功時のレスポンス"
+  /settings:
+    get:
+      summary: "設定情報取得"
+      description: "基本設定、通知設定を取得"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            $ref: "#/definitions/settings"
+    put:
+      summary: "設定情報更新"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+  /message_filter:
+    get:
+      summary: "メッセージフィルタ一覧取得"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+    post:
+      summary: "メッセージフィルタ―追加"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              mute_word:
+                type: "string"
+                description: "追加したいミュートワード"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+  /message-filter/{mute_word}:
+    delete:
+      summary: "メッセージフィルタ削除"
+      parameters:
+        - name: "mute_word"
+          in: "path"
+          description: "削除するミュートワード"
+          required: true
+          type: "string"
+      responses:
+        204:
+          description: "成功時のレスポンス"
+  /template:
+    get:
+      summary: "テンプレート取得"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            $ref: "#/definitions/template"
+    put:
+      summary: "テンプレート更新"
+      parameters:
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/template"
+      responses:
+        200:
+          description: "成功時のレスポンス"
+          schema:
+            $ref: "#/definitions/template"
+definitions:
+  message:
+    type: "object"
+    properties:
+      ques_seq:
+        type: "integer"
+        example: "xxxxxxxxxx"
+      ques_user_id:
+        type: "string"
+        example: "xxxxxxxxxx"
+      ques_date:
+        type: "string"
+        example: "20191117060311"
+      ques_text:
+        type: "string"
+        example: "好きな食べ物は何ですか？"
+      ans_user_id:
+        type: "string"
+        example: "xxxxxxxxxx"
+      ans_date:
+        type: "string"
+        example: "20191117060311"
+      ans_text:
+        type: "string"
+        example: "リンゴです"
+  settings:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "太郎"
+        description: "表示名"
+      user_id:
+        type: "string"
+        example: "tarou"
+        description: "ユーザID"
+      mail_address:
+        type: "string"
+        example: "tarou@example.com"
+        description: "メールアドレス"
+      profile:
+        type: "string"
+        example: "私は太郎です\n神奈川に住んでいます。"
+        description: "プロフィール"
+      profile_image:
+        type: "string"
+        format: "byte"
+        description: "プロフィール画像をbase64でエンコードした文字列"
+  template:
+    type: "object"
+    properties:
+      files:
+        type: "array"
+        description: "配列の長さは4まで（将来的な拡張はあるかも）"
+        items:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              example: "cat1.jpg"
+              description: "ファイル名"
+            base64:
+              type: "string"
+              format: "byte"
+              description: "画像をbase64でエンコードした文字列"
+      ques_template:
+        type: "string"
+        description: "質問画面テンプレート"
+      ans_template:
+        type: "string"
+        description: "回答画面テンプレート"
+      ogp:
+        type: "object"
+        description: "ogpタグの設定"
+        properties:
+          site_name:
+            type: "string"
+          title:
+            type: "string"
+          url:
+            type: "string"
+          image:
+            type: "string"
+          description:
+            type: "string"
